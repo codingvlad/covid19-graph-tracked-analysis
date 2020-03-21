@@ -5,11 +5,11 @@ import { Inject } from '@angular/core';
 import { MAT_SNACK_BAR_DATA } from '@angular/material';
 
 @Component({
-  selector: 'hello',
-  templateUrl: './hello.component.html',
-  styleUrls: ['./hello.component.css']
+  selector: 'map-view',
+  templateUrl: './map-view.component.html',
+  styleUrls: ['./map-view.component.css']
 })
-export class HelloComponent {
+export class MapViewComponent {
 
 
   constructor(private dataService: DataService, private userFeedback: MatSnackBar) {}

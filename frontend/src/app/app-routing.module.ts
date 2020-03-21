@@ -1,14 +1,14 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { HelloComponent } from './navigation/pages/hello/hello.component';
+import { MapViewComponent } from './navigation/pages/hello/map-view.component';
 
 
 const routes: Routes = [
   {
     path: 'hello',
-    component: HelloComponent,
+    component: MapViewComponent,
   },
-  { path: '', component: HelloComponent },
+  { path: '', component: MapViewComponent },
   { path: '**', redirectTo: '' }
 ];
 

@@ -22,19 +22,19 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatNativeDateModule } from '@angular/material'
 import {MatDialogModule} from '@angular/material/dialog'; 
-import { UserActionFeedbackComponent } from './navigation/pages/hello/hello.component';
+import { UserActionFeedbackComponent } from './navigation/pages/hello/map-view.component';
 
 import {MatSnackBarModule} from '@angular/material/snack-bar'; 
 import { FlexLayoutModule } from '@angular/flex-layout';
 
-import { HelloComponent } from './navigation/pages/hello/hello.component';
+import { MapViewComponent } from './navigation/pages/hello/map-view.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     NavigationComponent,
     UserActionFeedbackComponent,
-    HelloComponent,
+    MapViewComponent,
   ],
   imports: [
     BrowserModule,
