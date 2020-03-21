@@ -1,0 +1,26 @@
+/* You can add global styles to this file, and also import other style files */
+@import "~@angular/material/prebuilt-themes/indigo-pink.css";
+/*
+
+Sky Blue
+#79c0e4
+
+Steel Blue
+#4374ac
+
+Light Steel Blue
+#f7f8f9
+
+Dark Slate Gray
+#1d2947
+
+Dark Slate Blue
+#466988
+*/
+
+html, body { height: 100%; }
+body {
+    margin: 0px;
+    background-color: #eaf0fa;
+    font-family: Roboto,"Helvetica Neue Light","Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
+}

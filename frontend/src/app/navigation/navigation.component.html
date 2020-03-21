@@ -1,0 +1,19 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #drawer class="sidenav" fixedInViewport="true"
+    [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'" [mode]="(isHandset$ | async) ? 'over' : 'side'"
+    [opened]="!(isHandset$ | async)">
+    <mat-toolbar>
+      <div class="logo">
+        HelloApp v.0.0.1
+      </div>
+    </mat-toolbar>
+    <mat-nav-list>
+<!--       <a mat-list-item routerLink="/hello" routerLinkActive="active">
+        <mat-icon mat-list-icon>add</mat-icon>add
+      </a> -->
+    </mat-nav-list>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>

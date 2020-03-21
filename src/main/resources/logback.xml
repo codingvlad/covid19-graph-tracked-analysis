@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+    <property resource="buildinfo.properties" />
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%date{ISO8601}] [%-5level] [%X{componentName:-${name}}] [%X{componentVersion:-${version}}] [%logger{26}] [%X{akkaSource}] [%X{sourceThread}] - [%msg]%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="akka" level="INFO" />
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+</configuration>
