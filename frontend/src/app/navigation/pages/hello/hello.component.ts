@@ -4,8 +4,6 @@ import { MatSnackBar } from '@angular/material';
 import { Inject } from '@angular/core';
 import { MAT_SNACK_BAR_DATA } from '@angular/material';
 
-
-
 @Component({
   selector: 'hello',
   templateUrl: './hello.component.html',
