@@ -29,7 +29,9 @@ lazy val `server-devel` = project
       Dependencies.akkaHttpTestKit % Test,
       Dependencies.akkaTestKit % Test,
       Dependencies.akkaPersistenceCassandraLauncher % Test,
-      Dependencies.scalatest % Test
+      Dependencies.scalatest % Test ,
+      Dependencies.scalacheck,
+      Dependencies.scalagraph
     ),
     //Run tests Sequentially
     parallelExecution in Test := false,

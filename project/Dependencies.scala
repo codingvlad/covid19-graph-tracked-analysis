@@ -20,6 +20,10 @@ object Dependencies {
 
     val slf4jnop: String = "1.7.25"
 
+    val scalacheck = "1.14.3"
+
+    val scalagraph = "1.13.2"
+
   }
 
   /**
@@ -103,4 +107,13 @@ object Dependencies {
     */
   val slf4jnop = "org.slf4j" % "slf4j-nop" % Versions.slf4jnop
 
+  /**
+    * Property based testing for Scala
+    */
+  val scalacheck
+  : ModuleID = "org.scalacheck" %% "scalacheck" % Versions.scalacheck
+
+
+  val scalagraph
+  : ModuleID = "org.scala-graph" %% "graph-core" %  Versions.scalagraph
 }
