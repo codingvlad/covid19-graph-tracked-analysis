@@ -24,8 +24,11 @@ export interface MapCoordinates {
 export class MapViewComponent implements AfterViewInit {
 
   map: any;
+  munichLatLng = L.latLng(48.1351, 11.5820);
 
-  constructor(private dataService: DataService, private userFeedback: MatSnackBar) { }
+  constructor(
+    private dataService: DataService,
+    private userFeedback: MatSnackBar) { }
 
   ngAfterViewInit() {
     this.initMap();
@@ -33,10 +36,11 @@ export class MapViewComponent implements AfterViewInit {
   }
 
   private initMap(): void {
+
     d3.json('assets/data/plz-5stellig.geojson').then((data: any) => {
 
       this.map = L.map('mapView', {
-        center: [48.1351, 11.5820],
+        center: this.munichLatLng,
         zoom: 12
       });
 
