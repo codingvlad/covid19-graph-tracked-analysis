@@ -1,6 +1,14 @@
 # COVID-19 graph tracking and analysis
 A web application used by the health system authorized personel that provides means to input infected patients minimal data and that can further perform analysis of the data using graph theory algorithms.
 
+Link to [video](https://www.youtube.com/watch?v=XBkBRt_Q4FE)
+
+Link to [devpost](https://devpost.com/software/tbd-546hmo)
+
+Link to [demo](https://covid19-graph-tracked-analysis.herokuapp.com/)
+
+
+
 # Get it running
 *  Clone this repository
 *  `cd frontend`

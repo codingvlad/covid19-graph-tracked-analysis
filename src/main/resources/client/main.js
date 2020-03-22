@@ -319,7 +319,7 @@ module.exports = ".example-container {\n    display: flex;\n    flex-direction: 
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"full-height\">\n  <div fxLayout=\"row\">\n    <mat-toolbar>\n      <mat-toolbar-row>\n        <span>The current situation 21/03/2020</span>\n      </mat-toolbar-row>\n    </mat-toolbar>\n  </div>\n  <div fxLayout=\"column\" class=\"main-container\">\n    <div class=\"map-frame\">\n      <div id=\"mapView\"></div>\n    </div>\n  </div>\n</div>"
+module.exports = "<div class=\"full-height\">\n  <div fxLayout=\"row\">\n    <mat-toolbar>\n      <mat-toolbar-row>\n        <span>DEMO presentation</span>\n      </mat-toolbar-row>\n    </mat-toolbar>\n  </div>\n  <div fxLayout=\"column\" class=\"main-container\">\n    <div class=\"map-frame\">\n      <div id=\"mapView\"></div>\n    </div>\n  </div>\n</div>"
 
 /***/ }),
 
