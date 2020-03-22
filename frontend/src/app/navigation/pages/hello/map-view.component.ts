@@ -172,13 +172,13 @@ export class MapViewComponent implements AfterViewInit {
       .attr("r", 5)
       .on('mouseover', function () { //function to add mouseover event
         d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
-          .duration('150') //how long we are transitioning between the two states (works like keyframes)
+          .duration(150) //how long we are transitioning between the two states (works like keyframes)
           .attr("fill", "red") //change the fill
           .attr('r', 10) //change radius
       })
       .on('mouseout', function () { //reverse the action based on when we mouse off the the circle
         d3.select(this).transition()
-          .duration('150')
+          .duration(150)
           .attr("fill", "steelblue")
           .attr('r', 5)
       });

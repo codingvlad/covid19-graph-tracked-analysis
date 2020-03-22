@@ -353,24 +353,57 @@ __webpack_require__.r(__webpack_exports__);
 
 var MapViewComponent = /** @class */ (function () {
     function MapViewComponent(dataService, graphService, userFeedback) {
+        var _this = this;
         this.dataService = dataService;
         this.graphService = graphService;
         this.userFeedback = userFeedback;
         this.munichLatLng = leaflet__WEBPACK_IMPORTED_MODULE_4__["latLng"](48.1351, 11.5820);
         this.loadPostalCodeData = function () { return d3__WEBPACK_IMPORTED_MODULE_5__["json"]('assets/data/plz-5stellig.geojson'); };
+        this.loadPostalCodeCentroidData = function () { return d3__WEBPACK_IMPORTED_MODULE_5__["json"]('assets/data/plz-5stellig-centroid.geojson'); };
+        // Use Leaflets projection API for drawing svg path (creates a stream of projected points)
+        this.projectPoint = function (map) { return function (x, y) {
+            var point = map.latLngToLayerPoint(new leaflet__WEBPACK_IMPORTED_MODULE_4__["LatLng"](y, x));
+            this.stream.point(point.x, point.y);
+        }; };
+        // Use d3's custom geo transform method to implement the above
+        this.projection = function (map) { return d3__WEBPACK_IMPORTED_MODULE_5__["geoTransform"]({ point: _this.projectPoint(map) }); };
+        // creates geopath from projected points (SVG)
+        this.pathCreator = function () { return d3__WEBPACK_IMPORTED_MODULE_5__["geoPath"]().projection(_this.projection(_this.map)); };
+        // generate colors between yellow and red 
+        this.dangerLevelColorGenerator = d3__WEBPACK_IMPORTED_MODULE_5__["scaleLinear"]().domain([1, 5])
+            .range(["yellow", "red"]);
+        this.colorOfRandomPostalCodes = function (feature, randomPostalCodesToHighlight) {
+            if (randomPostalCodesToHighlight.includes(feature.properties.plz)) {
+                var postalCodeConnectivity = Math.floor(Math.random() * 5) + 1;
+                return _this.dangerLevelColorGenerator(postalCodeConnectivity);
+            }
+            else {
+                return 'green';
+            }
+        };
+        this.calculatePoint = function (d) {
+            return "translate(" +
+                _this.map.latLngToLayerPoint(d.LatLng).x + "," +
+                _this.map.latLngToLayerPoint(d.LatLng).y + ")";
+        };
     }
     MapViewComponent.prototype.ngAfterViewInit = function () {
         var _this = this;
         this.loadPostalCodeData().then(function (data) {
             var randomPostalCodesToHighlight = _this.graphService.initGraph(data);
-            _this.initMap(data, randomPostalCodesToHighlight);
+            _this.initMap();
+            _this.drawPostalCodes(data, randomPostalCodesToHighlight);
+            _this.loadPostalCodeCentroidData().then(function (dataCentroids) {
+                _this.drawPostalCodesCentroids(dataCentroids, randomPostalCodesToHighlight);
+                _this.drawGraphEdges(dataCentroids, randomPostalCodesToHighlight);
+            });
         });
         this.userFeedback.openFromComponent(UserActionFeedbackComponent, {
-            duration: 7000,
+            duration: 5000,
             data: "This tool displays FAKE DATA for demo purposes!!!"
         });
     };
-    MapViewComponent.prototype.initMap = function (data, randomPostalCodesToHighlight) {
+    MapViewComponent.prototype.initMap = function () {
         this.map = leaflet__WEBPACK_IMPORTED_MODULE_4__["map"]('mapView', {
             center: this.munichLatLng,
             zoom: 12
@@ -384,36 +417,19 @@ var MapViewComponent = /** @class */ (function () {
         leaflet__WEBPACK_IMPORTED_MODULE_4__["svg"]({ clickable: true }).addTo(this.map); // we have to make the svg layer clickable 
         //Create selection using D3
         var overlay = d3__WEBPACK_IMPORTED_MODULE_5__["select"](this.map.getPanes().overlayPane);
-        var svg = overlay.select('svg').attr('pointer-events', 'auto');
+        this.mapSvg = overlay.select('svg').attr('pointer-events', 'auto');
         // create a group that is hidden during zooming
-        var g = svg.append('g').attr('class', 'leaflet-zoom-hide');
-        var _map = this.map;
-        // Use Leaflets projection API for drawing svg path (creates a stream of projected points)
-        var projectPoint = function (x, y) {
-            var point = _map.latLngToLayerPoint(new leaflet__WEBPACK_IMPORTED_MODULE_4__["LatLng"](y, x));
-            this.stream.point(point.x, point.y);
-        };
-        // Use d3's custom geo transform method to implement the above
-        var projection = d3__WEBPACK_IMPORTED_MODULE_5__["geoTransform"]({ point: projectPoint });
-        // creates geopath from projected points (SVG)
-        var pathCreator = d3__WEBPACK_IMPORTED_MODULE_5__["geoPath"]().projection(projection);
-        var color = d3__WEBPACK_IMPORTED_MODULE_5__["scaleLinear"]().domain([1, 5])
-            .range(["yellow", "red"]);
-        var colorOfRandomPostalCodes = function (feature) {
-            if (randomPostalCodesToHighlight.includes(feature.properties.plz)) {
-                var postalCodeConnectivity = Math.floor(Math.random() * 5) + 1;
-                return color(postalCodeConnectivity);
-            }
-            else {
-                return 'green';
-            }
-        };
+        this.postalCodesSVGGroup = this.mapSvg.append('g').attr('class', 'leaflet-zoom-hide');
+    };
+    MapViewComponent.prototype.drawPostalCodes = function (data, postalCodes) {
         //const mapping: Array<PostalCodeMapInfo> = data.features.map(feature => this.extractPostalCodeInfo(feature));
-        var areaPaths = g.selectAll('path')
+        var _this = this;
+        var areadSVGGroup = this.postalCodesSVGGroup.append('g');
+        var areaPaths = areadSVGGroup.selectAll('path')
             .data(data.features)
             .join('path')
             .attr('fill-opacity', 0.3)
-            .attr('fill', colorOfRandomPostalCodes)
+            .attr('fill', function (d) { return _this.colorOfRandomPostalCodes(d, postalCodes); })
             .attr('stroke', 'black')
             .style('stroke-dasharray', '5, 5')
             .attr('z-index', 3000)
@@ -427,35 +443,105 @@ var MapViewComponent = /** @class */ (function () {
                 .attr('fill-opacity', 0.3);
         });
         // Function to place svg based on zoom
-        var onZoom = function () { return areaPaths.attr('d', pathCreator); };
+        var onZoom = function () { return areaPaths.attr('d', _this.pathCreator()); };
         // initialize positioning
         onZoom();
         // reset whenever map is moved
         this.map.on('zoomend', onZoom);
     };
-    MapViewComponent.prototype.extractPostalCodeInfo = function (geoJsonFeature) {
-        var coordinates = new Array();
-        geoJsonFeature.geometry.coordinates.forEach(function (polygon) {
-            var polygonCoordinates = new Array();
-            polygon.forEach(function (entry) {
-                polygonCoordinates.push({
-                    lat: entry[0],
-                    long: entry[1]
-                });
-            });
-            coordinates.push(polygonCoordinates);
-        });
-        return {
-            name: geoJsonFeature.properties.plz,
-            coordinates: coordinates
-        };
-    };
-    MapViewComponent.prototype.loadPostalCodes = function () {
+    MapViewComponent.prototype.drawPostalCodesCentroids = function (data, postalCodes) {
         var _this = this;
-        d3__WEBPACK_IMPORTED_MODULE_5__["json"]('assets/data/plz-5stellig.geojson').then(function (data) {
-            var mapping = data.features.map(function (feature) { return _this.extractPostalCodeInfo(feature); });
-            //console.log(mapping);
+        /* Add a LatLng object to each item in the dataset */
+        var pickedPostalCodes = [];
+        data.features.forEach(function (f) {
+            if (postalCodes.includes(f.properties.plz.toString())) {
+                pickedPostalCodes.push(f);
+            }
         });
+        var g = this.postalCodesSVGGroup.append('g');
+        var centroids = g.selectAll('circle')
+            .attr("class", "po-centroid")
+            .data(pickedPostalCodes)
+            .join('circle')
+            .attr("id", function (d) { return "postalCodeCentroid" + d.properties.plz; })
+            .attr("fill", "red")
+            .attr("stroke", "darkred")
+            //Leaflet has to take control of projecting points. Here we are feeding the latitude and longitude coordinates to
+            //leaflet so that it can project them on the coordinates of the view. Notice, we have to reverse lat and lon.
+            //Finally, the returned conversion produces an x and y point. We have to select the the desired one using .x or .y
+            .attr("cx", function (d) { return _this.map.latLngToLayerPoint([d.geometry.coordinates[1], d.geometry.coordinates[0]]).x; })
+            .attr("cy", function (d) { return _this.map.latLngToLayerPoint([d.geometry.coordinates[1], d.geometry.coordinates[0]]).y; })
+            .attr("r", 5)
+            .on('mouseover', function () {
+            d3__WEBPACK_IMPORTED_MODULE_5__["select"](this).transition() //D3 selects the object we have moused over in order to perform operations on it
+                .duration(150) //how long we are transitioning between the two states (works like keyframes)
+                .attr("fill", "red") //change the fill
+                .attr('r', 10); //change radius
+        })
+            .on('mouseout', function () {
+            d3__WEBPACK_IMPORTED_MODULE_5__["select"](this).transition()
+                .duration(150)
+                .attr("fill", "steelblue")
+                .attr('r', 5);
+        });
+        var update = function () { return centroids
+            .attr("cx", function (d) { return _this.map.latLngToLayerPoint([d.geometry.coordinates[1], d.geometry.coordinates[0]]).x; })
+            .attr("cy", function (d) { return _this.map.latLngToLayerPoint([d.geometry.coordinates[1], d.geometry.coordinates[0]]).y; }); };
+        this.map.on("zoomend", update);
+    };
+    MapViewComponent.prototype.windowScan = function (origin, neighbours) {
+        var randomNeighbours = this.graphService.shuffle(neighbours);
+        return randomNeighbours.map(function (neighbour) {
+            return { origin: origin, endpoint: neighbour };
+        });
+    };
+    MapViewComponent.prototype.getRandomInt = function (max) {
+        return Math.floor(Math.random() * Math.floor(max));
+    };
+    MapViewComponent.prototype.drawGraphEdges = function (data, postalCodes) {
+        var _this = this;
+        /* Add a LatLng object to each item in the dataset */
+        var pickedPostalCodes = [];
+        data.features.forEach(function (f) {
+            if (postalCodes.includes(f.properties.plz.toString())) {
+                pickedPostalCodes.push(f);
+            }
+        });
+        var orderedPickedPostalCodes = pickedPostalCodes.sort(function (p1, p2) { return (p1.properties.plz > p2.properties.plz) ? 1 : -1; });
+        var edges = [];
+        orderedPickedPostalCodes.forEach(function (affectedPostalCode, index, restOfPostalCodes) {
+            var affetctedEdges = _this.windowScan(affectedPostalCode, restOfPostalCodes.slice(index - _this.getRandomInt(2), index + _this.getRandomInt(5)));
+            affetctedEdges.forEach(function (edge) { return edges.push(edge); });
+        });
+        var g = this.postalCodesSVGGroup.append('g');
+        var edgesSVG = g.selectAll('line')
+            .data(edges)
+            .enter()
+            .append('line')
+            .attr("class", "graph-edge")
+            .attr("stroke", "darkred")
+            .attr("stroke-width", 2)
+            .attr("x1", function (d) { return _this.map.latLngToLayerPoint([d.origin.geometry.coordinates[1], d.origin.geometry.coordinates[0]]).x; })
+            .attr("y1", function (d) { return _this.map.latLngToLayerPoint([d.origin.geometry.coordinates[1], d.origin.geometry.coordinates[0]]).y; })
+            .attr("x2", function (d) { return _this.map.latLngToLayerPoint([d.endpoint.geometry.coordinates[1], d.endpoint.geometry.coordinates[0]]).x; })
+            .attr("y2", function (d) { return _this.map.latLngToLayerPoint([d.endpoint.geometry.coordinates[1], d.endpoint.geometry.coordinates[0]]).y; });
+        /*       .on('mouseover', function () { //function to add mouseover event
+                d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
+                  .duration('150') //how long we are transitioning between the two states (works like keyframes)
+                  .attr("fill", "red") //change the fill
+              })
+              .on('mouseout', function () { //reverse the action based on when we mouse off the the circle
+                d3.select(this).transition()
+                  .duration('150')
+                  .attr("fill", "steelblue")
+              }); */
+        var update = function () { return edgesSVG
+            .attr("x1", function (d) { return _this.map.latLngToLayerPoint([d.origin.geometry.coordinates[1], d.origin.geometry.coordinates[0]]).x; })
+            .attr("y1", function (d) { return _this.map.latLngToLayerPoint([d.origin.geometry.coordinates[1], d.origin.geometry.coordinates[0]]).y; })
+            .attr("x2", function (d) { return _this.map.latLngToLayerPoint([d.endpoint.geometry.coordinates[1], d.endpoint.geometry.coordinates[0]]).x; })
+            .attr("y2", function (d) { return _this.map.latLngToLayerPoint([d.endpoint.geometry.coordinates[1], d.endpoint.geometry.coordinates[0]]).y; }); };
+        update();
+        this.map.on("zoomend", update);
     };
     MapViewComponent.prototype.sayHi = function () {
         var _this = this;
