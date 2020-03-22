@@ -33,7 +33,7 @@ export class MapViewComponent implements AfterViewInit {
   }
 
   private initMap(): void {
-    d3.json("assets/data/plz-5stellig.geojson").then((data: any) => {
+    d3.json('assets/data/plz-5stellig.geojson').then((data: any) => {
 
       this.map = L.map('mapView', {
         center: [48.1351, 11.5820],
@@ -41,7 +41,7 @@ export class MapViewComponent implements AfterViewInit {
       });
 
       const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 12,
+        maxZoom: 14,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
       });
 
@@ -52,7 +52,7 @@ export class MapViewComponent implements AfterViewInit {
 
       //Create selection using D3
       const overlay = d3.select(this.map.getPanes().overlayPane)
-      const svg = overlay.select('svg').attr("pointer-events", "auto")
+      const svg = overlay.select('svg').attr('pointer-events', 'auto')
       // create a group that is hidden during zooming
       const g = svg.append('g').attr('class', 'leaflet-zoom-hide')
 
@@ -72,17 +72,23 @@ export class MapViewComponent implements AfterViewInit {
       const areaPaths = g.selectAll('path')
         .data(data.features)
         .join('path')
-        .attr('fill-opacity', 0.1)
+        .attr('fill-opacity', 0)
         .attr('stroke', 'black')
-        .attr("z-index", 3000)
+        .style('stroke-dasharray', '5, 5')
+        .attr('z-index', 3000)
         .attr('stroke-width', 1)
-        .on("mouseover", (_, i, g) => {
-          d3.select(g[i]).attr("fill", "red")
+        .on('mouseover', (_, i, g) => {
+          d3.select(g[i])
+            .attr('fill', 'red')
+            .attr('fill-opacity', 0.4)
         })
-        .on("mouseout", (_, i, g) => {
-          d3.select(g[i]).attr("fill", "black")
-        });
-      
+        .on('mouseout', (_, i, g) => {
+          d3.select(g[i])
+            .attr('fill', 'black')
+            .attr('fill-opacity', 0)
+        })
+;
+
       // Function to place svg based on zoom
       const onZoom = () => areaPaths.attr('d', pathCreator);
       // initialize positioning
@@ -90,7 +96,7 @@ export class MapViewComponent implements AfterViewInit {
       // reset whenever map is moved
       this.map.on('zoomend', onZoom);
     });
-    
+
   }
 
 
@@ -115,7 +121,7 @@ export class MapViewComponent implements AfterViewInit {
   }
 
   private loadPostalCodes(): void {
-    d3.json("assets/data/plz-5stellig.geojson").then((data: any) => {
+    d3.json('assets/data/plz-5stellig.geojson').then((data: any) => {
       const mapping: Array<PostalCodeMapInfo> = data.features.map(feature => this.extractPostalCodeInfo(feature));
       //console.log(mapping);
     })
