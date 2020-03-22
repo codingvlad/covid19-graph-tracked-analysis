@@ -15,9 +15,7 @@ export class GraphService {
 
   constructor() { }
 
-  initGraph(postalCodesData: any): Array<string> {
-    console.log(postalCodesData.features.length)
-    
+  initGraph(postalCodesData: any): Array<string> {    
     return this.shuffle(postalCodesData.features
       .map(f => f.properties.plz.toString()))
       .slice(0, 3000);

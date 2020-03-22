@@ -40,7 +40,7 @@ export class MapViewComponent implements AfterViewInit {
     })
     this.userFeedback.openFromComponent(UserActionFeedbackComponent, {
       duration: 7000,
-      data: "This tool display FAKE DATA for demo purposes!!!"
+      data: "This tool displays FAKE DATA for demo purposes!!!"
     });
   }
 
