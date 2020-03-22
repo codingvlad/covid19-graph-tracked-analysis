@@ -226,3 +226,7 @@ width: 30px;  }
         height: 100%;
         width: 100%;
       }
+
+      ::ng-deep .leaflet-overlay-pane svg path{
+    pointer-events: auto;
+}

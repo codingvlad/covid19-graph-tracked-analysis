@@ -33,18 +33,67 @@ export class MapViewComponent implements AfterViewInit {
   }
 
   private initMap(): void {
-    this.map = L.map('mapView', {
-      center: [48.1351, 11.5820],
-      zoom: 10
-    });
+    d3.json("assets/data/plz-5stellig.geojson").then((data: any) => {
 
-    const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    });
+      this.map = L.map('mapView', {
+        center: [48.1351, 11.5820],
+        zoom: 12
+      });
 
-    tiles.addTo(this.map);
+      const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 12,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      });
+
+      tiles.addTo(this.map);
+
+      //initialize svg to add to map
+      L.svg({ clickable: true }).addTo(this.map) // we have to make the svg layer clickable 
+
+      //Create selection using D3
+      const overlay = d3.select(this.map.getPanes().overlayPane)
+      const svg = overlay.select('svg').attr("pointer-events", "auto")
+      // create a group that is hidden during zooming
+      const g = svg.append('g').attr('class', 'leaflet-zoom-hide')
+
+      const _map = this.map;
+      // Use Leaflets projection API for drawing svg path (creates a stream of projected points)
+      const projectPoint = function (x, y) {
+        const point = _map.latLngToLayerPoint(new L.LatLng(y, x))
+        this.stream.point(point.x, point.y)
+      }
+
+      // Use d3's custom geo transform method to implement the above
+      const projection = d3.geoTransform({ point: projectPoint })
+      // creates geopath from projected points (SVG)
+      const pathCreator = d3.geoPath().projection(projection)
+
+      //const mapping: Array<PostalCodeMapInfo> = data.features.map(feature => this.extractPostalCodeInfo(feature));
+      const areaPaths = g.selectAll('path')
+        .data(data.features)
+        .join('path')
+        .attr('fill-opacity', 0.1)
+        .attr('stroke', 'black')
+        .attr("z-index", 3000)
+        .attr('stroke-width', 1)
+        .on("mouseover", (_, i, g) => {
+          d3.select(g[i]).attr("fill", "red")
+        })
+        .on("mouseout", (_, i, g) => {
+          d3.select(g[i]).attr("fill", "black")
+        });
+      
+      // Function to place svg based on zoom
+      const onZoom = () => areaPaths.attr('d', pathCreator);
+      // initialize positioning
+      onZoom();
+      // reset whenever map is moved
+      this.map.on('zoomend', onZoom);
+    });
+    
   }
+
+
 
   private extractPostalCodeInfo(geoJsonFeature: any): PostalCodeMapInfo {
     const coordinates = new Array<Array<MapCoordinates>>();
@@ -68,7 +117,7 @@ export class MapViewComponent implements AfterViewInit {
   private loadPostalCodes(): void {
     d3.json("assets/data/plz-5stellig.geojson").then((data: any) => {
       const mapping: Array<PostalCodeMapInfo> = data.features.map(feature => this.extractPostalCodeInfo(feature));
-      console.log(mapping);
+      //console.log(mapping);
     })
   }
 
