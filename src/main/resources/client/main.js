@@ -430,7 +430,7 @@ var MapViewComponent = /** @class */ (function () {
             .join('path')
             .attr('fill-opacity', 0.3)
             .attr('fill', function (d) { return _this.colorOfRandomPostalCodes(d, postalCodes); })
-            .attr('stroke', 'black')
+            .attr('stroke', 'grey')
             .style('stroke-dasharray', '5, 5')
             .attr('z-index', 3000)
             .attr('stroke-width', 1)
@@ -475,18 +475,19 @@ var MapViewComponent = /** @class */ (function () {
             .on('mouseover', function () {
             d3__WEBPACK_IMPORTED_MODULE_5__["select"](this).transition() //D3 selects the object we have moused over in order to perform operations on it
                 .duration(150) //how long we are transitioning between the two states (works like keyframes)
-                .attr("fill", "red") //change the fill
-                .attr('r', 10); //change radius
+                .attr("fill", "red"); //change the fill
         })
             .on('mouseout', function () {
             d3__WEBPACK_IMPORTED_MODULE_5__["select"](this).transition()
                 .duration(150)
-                .attr("fill", "steelblue")
-                .attr('r', 5);
+                .attr("fill", "red");
         });
-        var update = function () { return centroids
-            .attr("cx", function (d) { return _this.map.latLngToLayerPoint([d.geometry.coordinates[1], d.geometry.coordinates[0]]).x; })
-            .attr("cy", function (d) { return _this.map.latLngToLayerPoint([d.geometry.coordinates[1], d.geometry.coordinates[0]]).y; }); };
+        var update = function () {
+            console.log(_this.map.getZoom());
+            centroids
+                .attr("cx", function (d) { return _this.map.latLngToLayerPoint([d.geometry.coordinates[1], d.geometry.coordinates[0]]).x; })
+                .attr("cy", function (d) { return _this.map.latLngToLayerPoint([d.geometry.coordinates[1], d.geometry.coordinates[0]]).y; });
+        };
         this.map.on("zoomend", update);
     };
     MapViewComponent.prototype.windowScan = function (origin, neighbours) {
@@ -520,7 +521,7 @@ var MapViewComponent = /** @class */ (function () {
             .append('line')
             .attr("class", "graph-edge")
             .attr("stroke", "darkred")
-            .attr("stroke-width", 2)
+            .attr("stroke-width", 1)
             .attr("x1", function (d) { return _this.map.latLngToLayerPoint([d.origin.geometry.coordinates[1], d.origin.geometry.coordinates[0]]).x; })
             .attr("y1", function (d) { return _this.map.latLngToLayerPoint([d.origin.geometry.coordinates[1], d.origin.geometry.coordinates[0]]).y; })
             .attr("x2", function (d) { return _this.map.latLngToLayerPoint([d.endpoint.geometry.coordinates[1], d.endpoint.geometry.coordinates[0]]).x; })

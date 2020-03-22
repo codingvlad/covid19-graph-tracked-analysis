@@ -109,15 +109,15 @@ export class MapViewComponent implements AfterViewInit {
 
   private drawPostalCodes(data: any, postalCodes: Array<string>) {
     //const mapping: Array<PostalCodeMapInfo> = data.features.map(feature => this.extractPostalCodeInfo(feature));
-    
+
     const areadSVGGroup = this.postalCodesSVGGroup.append('g')
-    
+
     const areaPaths = areadSVGGroup.selectAll('path')
       .data(data.features)
       .join('path')
       .attr('fill-opacity', 0.3)
       .attr('fill', (d) => this.colorOfRandomPostalCodes(d, postalCodes))
-      .attr('stroke', 'black')
+      .attr('stroke', 'grey')
       .style('stroke-dasharray', '5, 5')
       .attr('z-index', 3000)
       .attr('stroke-width', 1)
@@ -174,19 +174,20 @@ export class MapViewComponent implements AfterViewInit {
         d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
           .duration(150) //how long we are transitioning between the two states (works like keyframes)
           .attr("fill", "red") //change the fill
-          .attr('r', 10) //change radius
       })
       .on('mouseout', function () { //reverse the action based on when we mouse off the the circle
         d3.select(this).transition()
           .duration(150)
-          .attr("fill", "steelblue")
-          .attr('r', 5)
+          .attr("fill", "red")
       });
 
 
-    const update = () => centroids
-      .attr("cx", d => this.map.latLngToLayerPoint([d.geometry.coordinates[1], d.geometry.coordinates[0]]).x)
-      .attr("cy", d => this.map.latLngToLayerPoint([d.geometry.coordinates[1], d.geometry.coordinates[0]]).y)
+    const update = () => {
+      console.log(this.map.getZoom())
+      centroids
+        .attr("cx", d => this.map.latLngToLayerPoint([d.geometry.coordinates[1], d.geometry.coordinates[0]]).x)
+        .attr("cy", d => this.map.latLngToLayerPoint([d.geometry.coordinates[1], d.geometry.coordinates[0]]).y)
+    }
 
 
     this.map.on("zoomend", update)
@@ -220,7 +221,6 @@ export class MapViewComponent implements AfterViewInit {
       affetctedEdges.forEach(edge => edges.push(edge))
     })
 
-
     const g = this.postalCodesSVGGroup.append('g')
 
     const edgesSVG = g.selectAll('line')
@@ -229,21 +229,21 @@ export class MapViewComponent implements AfterViewInit {
       .append('line')
       .attr("class", "graph-edge")
       .attr("stroke", "darkred")
-      .attr("stroke-width", 2)
+      .attr("stroke-width", 1)
       .attr("x1", (d) => this.map.latLngToLayerPoint([d.origin.geometry.coordinates[1], d.origin.geometry.coordinates[0]]).x)
       .attr("y1", (d) => this.map.latLngToLayerPoint([d.origin.geometry.coordinates[1], d.origin.geometry.coordinates[0]]).y)
       .attr("x2", (d) => this.map.latLngToLayerPoint([d.endpoint.geometry.coordinates[1], d.endpoint.geometry.coordinates[0]]).x)
       .attr("y2", (d) => this.map.latLngToLayerPoint([d.endpoint.geometry.coordinates[1], d.endpoint.geometry.coordinates[0]]).y)
-/*       .on('mouseover', function () { //function to add mouseover event
-        d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
-          .duration('150') //how long we are transitioning between the two states (works like keyframes)
-          .attr("fill", "red") //change the fill
-      })
-      .on('mouseout', function () { //reverse the action based on when we mouse off the the circle
-        d3.select(this).transition()
-          .duration('150')
-          .attr("fill", "steelblue")
-      }); */
+    /*       .on('mouseover', function () { //function to add mouseover event
+            d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
+              .duration('150') //how long we are transitioning between the two states (works like keyframes)
+              .attr("fill", "red") //change the fill
+          })
+          .on('mouseout', function () { //reverse the action based on when we mouse off the the circle
+            d3.select(this).transition()
+              .duration('150')
+              .attr("fill", "steelblue")
+          }); */
 
 
     const update = () => edgesSVG
@@ -251,7 +251,7 @@ export class MapViewComponent implements AfterViewInit {
       .attr("y1", (d) => this.map.latLngToLayerPoint([d.origin.geometry.coordinates[1], d.origin.geometry.coordinates[0]]).y)
       .attr("x2", (d) => this.map.latLngToLayerPoint([d.endpoint.geometry.coordinates[1], d.endpoint.geometry.coordinates[0]]).x)
       .attr("y2", (d) => this.map.latLngToLayerPoint([d.endpoint.geometry.coordinates[1], d.endpoint.geometry.coordinates[0]]).y)
-    
+
     update()
 
     this.map.on("zoomend", update)
